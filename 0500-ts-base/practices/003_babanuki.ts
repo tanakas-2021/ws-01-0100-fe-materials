@@ -86,6 +86,20 @@ export class GameMaster implements IGameMaster {
   turn: number;
   loser: IPlayer | null;
 
+  // Fisher-Yates Shuffleアルゴリズムを使い、deckをランダムにシャッフル
+  shuffleDeck(cards: Card[]): Card[] {
+    for (let i = cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
+    return cards
+  }
+  distributeCards(shuffledDeck: Card[], indices: number[], player: IPlayer) {
+    indices.forEach((index) => {
+      player.hands.push(shuffledDeck[index]);
+    });
+  }
+
   constructor(logger: ILogger, players: IPlayer[]) {
     this.logger = logger;
     this.players = players;
@@ -96,46 +110,20 @@ export class GameMaster implements IGameMaster {
   }
 
   run() {
-    // shuffle deck (Fisher-Yates Shuffleアルゴリズムを使う)
-    const shuffledDeck = [...this.cards];
-    for (let i = shuffledDeck.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledDeck[i], shuffledDeck[j]] = [shuffledDeck[j], shuffledDeck[i]];
-    }
-    this.players.map((player, index) => {
-      switch (index) {
-        case 0:
-          const player0_indexs = [
-            0, 1, 8, 9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49,
-          ];
-          player0_indexs.map((index) => {
-            player.hands.push(shuffledDeck[index]);
-          });
-          break;
-        case 1:
-          const player1_indexs = [
-            2, 3, 10, 11, 18, 19, 26, 27, 34, 35, 42, 43, 50, 51,
-          ];
-          player1_indexs.map((index) => {
-            player.hands.push(shuffledDeck[index]);
-          });
-          break;
-        case 2:
-          const player2_indexs = [
-            4, 5, 12, 13, 20, 21, 28, 29, 36, 37, 44, 45, 52,
-          ];
-          player2_indexs.map((index) => {
-            player.hands.push(shuffledDeck[index]);
-          });
-          break;
-        case 3:
-          const player3_indexs = [6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47];
-          player3_indexs.map((index) => {
-            player.hands.push(shuffledDeck[index]);
-          });
-          break;
-      }
+    const shuffledDeck = this.shuffleDeck(this.cards)
+
+    const distributionIndices = [
+      [0, 1, 8, 9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49], // Player 0
+      [2, 3, 10, 11, 18, 19, 26, 27, 34, 35, 42, 43, 50, 51], // Player 1
+      [4, 5, 12, 13, 20, 21, 28, 29, 36, 37, 44, 45, 52], // Player 2
+      [6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47], // Player 3
+    ];
+
+    this.players.forEach((player, index) => {
+      const indices = distributionIndices[index];
+      this.distributeCards(shuffledDeck, indices, player);
     });
+    
     this.logger.firstDiscard();
     this.players.map((player) => {
       this.logger.currentState(this.turn, player);
@@ -157,7 +145,7 @@ export class GameMaster implements IGameMaster {
         if (!this.rank.includes(player)) {
           console.log(`${this.turn} ===========`);
           this.logger.currentState(this.turn, player);
-          
+
           const randomIndex = getRandomIndex(opponentPlayer.hands.length);
           const drawCard = opponentPlayer.hands[randomIndex];
           this.logger.draw(player, opponentPlayer, drawCard);
@@ -174,7 +162,7 @@ export class GameMaster implements IGameMaster {
             this.rank.push(player);
             this.logger.done(player);
             if (this.players.length === 2) {
-              this.loser = opponentPlayer
+              this.loser = opponentPlayer;
               break;
             }
           }
@@ -182,7 +170,7 @@ export class GameMaster implements IGameMaster {
             this.rank.push(opponentPlayer);
             this.logger.done(opponentPlayer);
             if (this.players.length === 2) {
-              this.loser = player
+              this.loser = player;
               break;
             }
           }
@@ -200,7 +188,7 @@ export class GameMaster implements IGameMaster {
             break;
           }
         }
-      };
+      }
       // 1じゅんした場合、参加しているplayerの中からゲームから抜けたplayerを除外する
       this.players = this.players.filter(
         (player) => !this.rank.includes(player)
