@@ -28,21 +28,190 @@
  *  - GameMaster クラスの run メソッドが実行されるとゲームが実行できるようにしてください。
  */
 
-import { Card, getRandomIndex, IPlayer, IGameMaster, ILogger, Logger } from "../lib/babanuki";
+import {
+  Card,
+  getRandomIndex,
+  IPlayer,
+  IGameMaster,
+  ILogger,
+  Logger,
+} from "../lib/babanuki";
 
 export class Player implements IPlayer {
+  hands: Card[];
+  name: string;
+
+  constructor(name: string) {
+    this.name = name;
+    this.hands = [];
+  }
+
+  pairCards(cards: Card[]): Card[] {
+    // valueごとにグループ化
+    const groups = cards.reduce<Record<number, Card[]>>((acc, card) => {
+      if (!acc[card.value]) {
+        acc[card.value] = [];
+      }
+      acc[card.value].push(card);
+      return acc;
+    }, {});
+    const discardCards: Card[] = [];
+    for (const group of Object.values(groups)) {
+      if (group.length === 2 || group.length === 4) {
+        // 2枚または4枚はそのまま捨てる
+        discardCards.push(...group);
+      } else if (group.length === 3) {
+        // 3枚の場合は先頭から2枚を捨てる
+        const selected = group.slice(0, 2);
+        discardCards.push(...selected);
+      }
+    }
+    this.hands = this.hands.filter((card) => !discardCards.includes(card));
+    return discardCards;
+  }
+
+  drawCard(card: Card): void {
+    this.hands.push(card);
+  }
+  giveCardToOpponent(card: Card): void {
+    this.hands = this.hands.filter((hand) => hand !== card);
+  }
 }
 
 export class GameMaster implements IGameMaster {
   logger: ILogger;
+  cards: Card[];
   players: IPlayer[];
+  rank: IPlayer[];
+  turn: number;
+  loser: IPlayer | null;
 
   constructor(logger: ILogger, players: IPlayer[]) {
     this.logger = logger;
     this.players = players;
+    this.turn = 1;
+    this.cards = Card.prepare();
+    this.rank = [];
+    this.loser = null;
   }
 
-  run() {}
+  run() {
+    // shuffle deck (Fisher-Yates Shuffleアルゴリズムを使う)
+    const shuffledDeck = [...this.cards];
+    for (let i = shuffledDeck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledDeck[i], shuffledDeck[j]] = [shuffledDeck[j], shuffledDeck[i]];
+    }
+    this.players.map((player, index) => {
+      switch (index) {
+        case 0:
+          const player0_indexs = [
+            0, 1, 8, 9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49,
+          ];
+          player0_indexs.map((index) => {
+            player.hands.push(shuffledDeck[index]);
+          });
+          break;
+        case 1:
+          const player1_indexs = [
+            2, 3, 10, 11, 18, 19, 26, 27, 34, 35, 42, 43, 50, 51,
+          ];
+          player1_indexs.map((index) => {
+            player.hands.push(shuffledDeck[index]);
+          });
+          break;
+        case 2:
+          const player2_indexs = [
+            4, 5, 12, 13, 20, 21, 28, 29, 36, 37, 44, 45, 52,
+          ];
+          player2_indexs.map((index) => {
+            player.hands.push(shuffledDeck[index]);
+          });
+          break;
+        case 3:
+          const player3_indexs = [6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47];
+          player3_indexs.map((index) => {
+            player.hands.push(shuffledDeck[index]);
+          });
+          break;
+      }
+    });
+    this.logger.firstDiscard();
+    this.players.map((player) => {
+      this.logger.currentState(this.turn, player);
+      const discardCards: Card[] = player.pairCards(player.hands);
+      this.logger.discard(player, discardCards);
+      this.turn += 1;
+    });
+    this.logger.start();
+    while (this.rank.length < 3 || this.loser === null) {
+      for (let index = 0; index < this.players.length; index++) {
+        const player = this.players[index];
+        const opponentPlayer = this.players[(index + 1) % this.players.length];
+
+        if (player === opponentPlayer) {
+          this.loser = player;
+          break; // ループを終了
+        }
+
+        if (!this.rank.includes(player)) {
+          console.log(`${this.turn} ===========`);
+          this.logger.currentState(this.turn, player);
+          
+          const randomIndex = getRandomIndex(opponentPlayer.hands.length);
+          const drawCard = opponentPlayer.hands[randomIndex];
+          this.logger.draw(player, opponentPlayer, drawCard);
+
+          player.drawCard(drawCard);
+          opponentPlayer.giveCardToOpponent(drawCard);
+
+          const discardCards: Card[] = player.pairCards(player.hands);
+          this.logger.discard(player, discardCards);
+          this.turn += 1;
+
+          //カードの枚数が0枚であればゲームから抜けたことを出力する
+          if (player.hands.length === 0) {
+            this.rank.push(player);
+            this.logger.done(player);
+            if (this.players.length === 2) {
+              this.loser = opponentPlayer
+              break;
+            }
+          }
+          if (opponentPlayer.hands.length === 0) {
+            this.rank.push(opponentPlayer);
+            this.logger.done(opponentPlayer);
+            if (this.players.length === 2) {
+              this.loser = player
+              break;
+            }
+          }
+          //カードの枚数がjoker1枚のみとき、ゲームを終了する
+          if (player.hands.length === 1 && player.hands[0].isJoker) {
+            this.loser = opponentPlayer;
+            break;
+          }
+          //カードの枚数がjoker1枚のみとき、ゲームを終了する
+          if (
+            opponentPlayer.hands.length === 1 &&
+            opponentPlayer.hands[0].isJoker
+          ) {
+            this.loser = player;
+            break;
+          }
+        }
+      };
+      // 1じゅんした場合、参加しているplayerの中からゲームから抜けたplayerを除外する
+      this.players = this.players.filter(
+        (player) => !this.rank.includes(player)
+      );
+    }
+    if (this.loser !== null) {
+      this.logger.end(this.loser, this.rank);
+    } else {
+      throw new Error("Loser is null. Cannot end the game.");
+    }
+  }
 }
 
 // [編集不要] ターミナルでの実行用の関数。
