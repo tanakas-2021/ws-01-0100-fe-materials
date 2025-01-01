@@ -92,7 +92,7 @@ export class GameMaster implements IGameMaster {
       const j = Math.floor(Math.random() * (i + 1));
       [cards[i], cards[j]] = [cards[j], cards[i]];
     }
-    return cards
+    return cards;
   }
   distributeCards(shuffledDeck: Card[], indices: number[], player: IPlayer) {
     indices.forEach((index) => {
@@ -110,20 +110,18 @@ export class GameMaster implements IGameMaster {
   }
 
   run() {
-    const shuffledDeck = this.shuffleDeck(this.cards)
-
+    const shuffledDeck = this.shuffleDeck(this.cards);
     const distributionIndices = [
       [0, 1, 8, 9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49], // Player 0
       [2, 3, 10, 11, 18, 19, 26, 27, 34, 35, 42, 43, 50, 51], // Player 1
       [4, 5, 12, 13, 20, 21, 28, 29, 36, 37, 44, 45, 52], // Player 2
       [6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47], // Player 3
     ];
-
     this.players.forEach((player, index) => {
       const indices = distributionIndices[index];
       this.distributeCards(shuffledDeck, indices, player);
     });
-    
+
     this.logger.firstDiscard();
     this.players.map((player) => {
       this.logger.currentState(this.turn, player);
@@ -131,6 +129,7 @@ export class GameMaster implements IGameMaster {
       this.logger.discard(player, discardCards);
       this.turn += 1;
     });
+
     this.logger.start();
     while (this.rank.length < 3 || this.loser === null) {
       for (let index = 0; index < this.players.length; index++) {
@@ -140,6 +139,21 @@ export class GameMaster implements IGameMaster {
         if (player === opponentPlayer) {
           this.loser = player;
           break; // ループを終了
+        }
+
+        // 前のターンで手札を引かれて0になった場合勝利する
+        if (player.hands.length === 0) {
+          this.rank.push(player);
+          this.logger.done(player);
+          if (this.players.length === 2) {
+            this.loser = opponentPlayer;
+            break;
+          }
+        }
+        //カードの枚数がjoker1枚のみとき、ゲームを終了する
+        if (player.hands.length === 1 && player.hands[0].isJoker) {
+          this.loser = player;
+          break;
         }
 
         if (!this.rank.includes(player)) {
@@ -166,24 +180,8 @@ export class GameMaster implements IGameMaster {
               break;
             }
           }
-          if (opponentPlayer.hands.length === 0) {
-            this.rank.push(opponentPlayer);
-            this.logger.done(opponentPlayer);
-            if (this.players.length === 2) {
-              this.loser = player;
-              break;
-            }
-          }
           //カードの枚数がjoker1枚のみとき、ゲームを終了する
           if (player.hands.length === 1 && player.hands[0].isJoker) {
-            this.loser = opponentPlayer;
-            break;
-          }
-          //カードの枚数がjoker1枚のみとき、ゲームを終了する
-          if (
-            opponentPlayer.hands.length === 1 &&
-            opponentPlayer.hands[0].isJoker
-          ) {
             this.loser = player;
             break;
           }
