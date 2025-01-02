@@ -46,6 +46,10 @@ export class Player implements IPlayer {
     this.hands = [];
   }
 
+  get done(): boolean {
+    return this.hands.length === 0;
+  }
+
   pairCards(cards: Card[]): Card[] {
     // valueごとにグループ化
     const groups = cards.reduce<Record<number, Card[]>>((acc, card) => {
@@ -142,7 +146,7 @@ export class GameMaster implements IGameMaster {
         }
 
         // 前のターンで手札を引かれて0になった場合勝利する
-        if (player.hands.length === 0) {
+        if (player.done) {
           this.rank.push(player);
           this.logger.done(player);
           if (this.players.length === 2) {
@@ -172,7 +176,7 @@ export class GameMaster implements IGameMaster {
           this.turn += 1;
 
           //カードの枚数が0枚であればゲームから抜けたことを出力する
-          if (player.hands.length === 0) {
+          if (player.done) {
             this.rank.push(player);
             this.logger.done(player);
             if (this.players.length === 2) {

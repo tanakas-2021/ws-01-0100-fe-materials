@@ -145,6 +145,7 @@ export interface IPlayer {
   pairCards: (cards: Card[]) => Card[];
   drawCard: (card: Card) => void;
   giveCardToOpponent: (card: Card) => void;
+  done:boolean;
 }
 
 export interface IGameMaster {
