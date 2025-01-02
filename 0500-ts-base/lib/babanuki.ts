@@ -142,6 +142,11 @@ export class Logger implements ILogger {
 export interface IPlayer {
   hands: Card[];
   name: string;
+  firstDiscardCards: (cards: Card[]) => Card[];
+  discardCards: (drawCard: Card) => Card[];
+  drawCard: (card: Card) => void;
+  giveCardToOpponent: (card: Card) => void;
+  done:boolean;
 }
 
 export interface IGameMaster {
@@ -151,6 +156,7 @@ export interface IGameMaster {
   rank: IPlayer[];
   turn: number;
   run: () => void;
+  loser: IPlayer | null;
 }
 
 
