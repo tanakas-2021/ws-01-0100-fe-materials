@@ -50,10 +50,10 @@ export class Player implements IPlayer {
     return this.hands.length === 0;
   }
 
-  pairCards(cards: Card[]): Card[] {
+  firstDiscardCards(cards: Card[]): Card[] {
     // valueごとにグループ化
     const groups = cards.reduce<Record<number, Card[]>>((acc, card) => {
-      if (!acc[card.value]) {
+      if (!acc[card?.value]) {
         acc[card.value] = [];
       }
       acc[card.value].push(card);
@@ -72,6 +72,21 @@ export class Player implements IPlayer {
     }
     this.hands = this.hands.filter((card) => !discardCards.includes(card));
     return discardCards;
+  }
+
+  discardCards(drawCard: Card): Card[] {
+    const discardCards: Card[] = [];
+    for (const hand of this.hands) {
+      if (hand === drawCard) {
+        discardCards.push(hand);
+        discardCards.push(drawCard);
+        break;
+      }
+    }
+    if(discardCards.length !== 0){
+      this.hands = this.hands.filter((card) => !discardCards.includes(card));
+    }
+    return discardCards
   }
 
   drawCard(card: Card): void {
@@ -129,7 +144,7 @@ export class GameMaster implements IGameMaster {
     this.logger.firstDiscard();
     this.players.map((player) => {
       this.logger.currentState(this.turn, player);
-      const discardCards: Card[] = player.pairCards(player.hands);
+      const discardCards: Card[] = player.firstDiscardCards(player.hands);
       this.logger.discard(player, discardCards);
       this.turn += 1;
     });
@@ -171,7 +186,7 @@ export class GameMaster implements IGameMaster {
           player.drawCard(drawCard);
           opponentPlayer.giveCardToOpponent(drawCard);
 
-          const discardCards: Card[] = player.pairCards(player.hands);
+          const discardCards: Card[] = player.discardCards(drawCard);
           this.logger.discard(player, discardCards);
           this.turn += 1;
 
