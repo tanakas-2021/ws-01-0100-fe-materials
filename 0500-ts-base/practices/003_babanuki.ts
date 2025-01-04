@@ -77,7 +77,7 @@ export class Player implements IPlayer {
   discardCards(drawCard: Card): Card[] {
     const discardCards: Card[] = [];
     for (const hand of this.hands) {
-      if (hand === drawCard) {
+      if (hand !== drawCard && hand.value === drawCard.value) {
         discardCards.push(hand);
         discardCards.push(drawCard);
         break;
