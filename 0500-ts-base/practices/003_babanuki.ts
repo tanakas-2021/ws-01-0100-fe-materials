@@ -89,11 +89,16 @@ export class Player implements IPlayer {
     return discardCards;
   }
 
-  drawCard(card: Card): void {
-    this.hands.push(card);
-  }
-  giveCardToNextPlayer(card: Card): void {
-    this.hands = this.hands.filter((hand) => hand !== card);
+  drawCard(nextPlayer: IPlayer): Card {
+    // nextPlayerからカードを選ぶ
+    const randomIndex = getRandomIndex(nextPlayer.hands.length);
+    const drawCard = nextPlayer.hands[randomIndex];
+    // nextPlayerからカードを抜く
+    nextPlayer.hands.splice(randomIndex, 1);
+    // 自分の手札にカードを加える
+    this.hands.push(drawCard);
+
+    return drawCard;
   }
 }
 
@@ -170,13 +175,11 @@ export class GameMaster implements IGameMaster {
         if (!this.rank.includes(player)) {
           this.logger.currentState(this.turn, player);
 
-          const randomIndex = getRandomIndex(nextPlayer.hands.length);
-          const drawCard = nextPlayer.hands[randomIndex];
+          // draw card
+          const drawCard = player.drawCard(nextPlayer);
           this.logger.draw(player, nextPlayer, drawCard);
 
-          player.drawCard(drawCard);
-          nextPlayer.giveCardToNextPlayer(drawCard);
-
+          // discard card if match
           const discardCards: Card[] = player.discardCards(drawCard);
           this.logger.discard(player, discardCards);
           this.turn += 1;
