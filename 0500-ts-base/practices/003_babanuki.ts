@@ -122,7 +122,7 @@ export class GameMaster implements IGameMaster {
         this.cards.splice(randomIndex, 1);
       }
     }
-    
+
     this.logger.firstDiscard();
     this.players.map((player) => {
       this.logger.currentState(this.turn, player);
@@ -135,11 +135,21 @@ export class GameMaster implements IGameMaster {
     while (this.rank.length < this.players.length - 1 || this.loser === null) {
       for (let index = 0; index < this.players.length; index++) {
         const player = this.players[index];
-        const opponentPlayer = this.players[(index + 1) % this.players.length];
-
-        if (player === opponentPlayer) {
-          this.loser = player;
-          break; // ループを終了
+        // playerがゲームに参加しているかを確認する。ゲームに参加していな場合は次のPlayerに移動する
+        if (this.rank.includes(player)) {
+          continue;
+        }
+        // 次のPlayerを探す
+        let opponentIndex = (index + 1) % this.players.length; // 最初の相手の候補
+        let opponentPlayer = this.players[opponentIndex];
+        while (this.rank.includes(opponentPlayer)) {
+          opponentIndex = (opponentIndex + 1) % this.players.length; // 次のプレイヤー
+          opponentPlayer = this.players[opponentIndex];
+          if (opponentPlayer === player) {
+            // 自分自身しか残っていない場合
+            this.loser = player;
+            break;
+          }
         }
 
         // 前のターンで手札を引かれて0になった場合勝利する
@@ -188,10 +198,6 @@ export class GameMaster implements IGameMaster {
           }
         }
       }
-      // 1じゅんした場合、参加しているplayerの中からゲームから抜けたplayerを除外する
-      this.players = this.players.filter(
-        (player) => !this.rank.includes(player)
-      );
     }
     if (this.loser !== null) {
       this.logger.end(this.loser, this.rank);
