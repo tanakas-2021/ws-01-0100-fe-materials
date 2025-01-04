@@ -50,6 +50,10 @@ export class Player implements IPlayer {
     return this.hands.length === 0;
   }
 
+  get isLose(): boolean {
+    return this.hands.length === 1 && this.hands[0].isJoker;
+  }
+
   firstDiscardCards(cards: Card[]): Card[] {
     // valueごとにグループ化
     const groups = cards.reduce<Record<number, Card[]>>((acc, card) => {
@@ -164,7 +168,7 @@ export class GameMaster implements IGameMaster {
           continue;
         }
         //カードの枚数がjoker1枚のみとき、ゲームを終了する
-        if (player.hands.length === 1 && player.hands[0].isJoker) {
+        if (player.isLose) {
           this.loser = player;
           break;
         }
@@ -191,7 +195,7 @@ export class GameMaster implements IGameMaster {
             }
           }
           //カードの枚数がjoker1枚のみとき、ゲームを終了する
-          if (player.hands.length === 1 && player.hands[0].isJoker) {
+          if (player.isLose) {
             this.loser = player;
             break;
           }

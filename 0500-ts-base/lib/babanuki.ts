@@ -148,6 +148,7 @@ export interface IPlayer {
   discardCards: (drawCard: Card) => Card[];
   drawCard: (player: IPlayer) => Card;
   done: boolean;
+  isLose: boolean;
 }
 
 export interface IGameMaster {
