@@ -161,10 +161,7 @@ export class GameMaster implements IGameMaster {
         if (player.done) {
           this.rank.push(player);
           this.logger.done(player);
-          if (this.players.length === 2) {
-            this.loser = nextPlayer;
-            break;
-          }
+          continue;
         }
         //カードの枚数がjoker1枚のみとき、ゲームを終了する
         if (player.hands.length === 1 && player.hands[0].isJoker) {
