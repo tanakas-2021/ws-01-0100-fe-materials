@@ -161,17 +161,6 @@ export class GameMaster implements IGameMaster {
           }
         }
 
-        // 前のターンで手札を引かれて0になった場合勝利する
-        if (player.done) {
-          this.rank.push(player);
-          this.logger.done(player);
-          continue;
-        }
-        //カードの枚数がjoker1枚のみとき、ゲームを終了する
-        if (player.isLose) {
-          this.loser = player;
-          break;
-        }
 
         if (!this.rank.includes(player)) {
           this.logger.currentState(this.turn, player);
@@ -185,7 +174,7 @@ export class GameMaster implements IGameMaster {
           this.logger.discard(player, discardCards);
           this.turn += 1;
 
-          //カードの枚数が0枚であればゲームから抜けたことを出力する
+          //playerのカードの枚数が0枚であればゲームから抜けたことを出力する
           if (player.done) {
             this.rank.push(player);
             this.logger.done(player);
@@ -194,9 +183,23 @@ export class GameMaster implements IGameMaster {
               break;
             }
           }
-          //カードの枚数がjoker1枚のみとき、ゲームを終了する
+          //playerのカードの枚数がjoker1枚のみとき、ゲームを終了する
           if (player.isLose) {
             this.loser = player;
+            break;
+          }
+          //nextplayerのカードの枚数が0枚であればゲームから抜けたことを出力する
+          if (nextPlayer.done) {
+            this.rank.push(nextPlayer);
+            this.logger.done(nextPlayer);
+            if (this.players.length === 2) {
+              this.loser = player;
+              break;
+            }
+          }
+          //nextplayerのカードの枚数がjoker1枚のみとき、ゲームを終了する
+          if (nextPlayer.isLose) {
+            this.loser = nextPlayer;
             break;
           }
         }
