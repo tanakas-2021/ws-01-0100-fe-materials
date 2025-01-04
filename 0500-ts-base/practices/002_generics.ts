@@ -47,22 +47,14 @@ export class List<T> implements IList<T> {
     this.data.push(value);
   }
   pop(): T | undefined {
-    if (this.data.length === 0) {
-      return undefined;
-    } else {
-      const removeItem = this.data[this.data.length - 1];
-      this.data.splice(this.data.length - 1, 1);
-      return removeItem;
-    }
+    return this.data.pop();
   }
   remove(index: number): T | undefined {
-    if (this.data.length - 1 < index) {
-      return undefined;
-    } else {
-      const removeItem = this.data[index];
-      this.data.splice(index, 1);
-      return removeItem;
+    const val = this.data[index];
+    if (!val) {
+      return;
     }
+    return this.data.splice(index, 1)[0];
   }
 }
 
@@ -78,20 +70,10 @@ export class Stack<T> implements IStack<T> {
     this.data.push(value);
   }
   pop(): T | undefined {
-    if (this.data.length === 0) {
-      return undefined;
-    } else {
-      const removeItem = this.data[this.data.length - 1];
-      this.data.splice(this.data.length - 1, 1);
-      return removeItem;
-    }
+    return this.data.pop();
   }
   peak(): T | undefined {
-    if (this.data.length === 0) {
-      return undefined;
-    } else {
-      return this.data[this.data.length - 1];
-    }
+    return this.data[this.data.length - 1];
   }
 }
 
@@ -116,10 +98,6 @@ export class Queue<T> implements IQueue<T> {
     }
   }
   peak(): T | undefined {
-    if (this.data.length === 0) {
-      return undefined;
-    } else {
-      return this.data[0];
-    }
+    return this.data[0];
   }
 }

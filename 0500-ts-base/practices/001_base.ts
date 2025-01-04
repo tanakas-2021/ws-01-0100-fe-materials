@@ -37,10 +37,10 @@ export const sum = (nums: number[]): number => {
 
 export const format = (date: Date) => {
   const year: number = date.getFullYear();
-  const month: number = date.getMonth() + 1; //月は0始まりのため1を足す
-  const day: number = date.getDate();
+  const month: string = (date.getMonth() + 1).toString().padStart(2, "0"); //月は0始まりのため1を足す
+  const day: string = date.getDate().toString().padStart(2, "0");
 
-  const formattedDate: string = `${year}/${month < 10 ? "0" : ""}${month}/${day < 10 ? "0" : ""}${day}`;
+  const formattedDate: string = `${year}/${month}/${day}`;
   return formattedDate;
 };
 
@@ -63,24 +63,14 @@ export const merge = (
   obj1: Record<string, number>,
   obj2: Record<string, number>
 ): Record<string, number> => {
-  const result: Record<string, number> = {};
-  for (const key1 in obj1) {
-    for (const key2 in obj2) {
-      if (key1 === key2) {
-        result[key1] = obj1[key1] + obj2[key2];
-      }
+  const result: Record<string, number> = { ...obj1 };
+  Object.keys(obj2).forEach((key) => {
+    if (result[key]) {
+      result[key] += obj2[key];
+    } else {
+      result[key] = obj2[key];
     }
-    // resultにkey1が追加されていない場合、追加する。
-    if (!result.hasOwnProperty(key1)) {
-      result[key1] = obj1[key1];
-    }
-  }
-  // resultにkey2が追加されていない場合、追加する。
-  for (const key2 in obj2) {
-    if (!result.hasOwnProperty(key2)) {
-      result[key2] = obj2[key2];
-    }
-  }
+  });
   return result;
 };
 
@@ -102,11 +92,5 @@ export const merge = (
 export const stringify = (
   value: string | number | boolean | null | undefined
 ): string => {
-  if (value === null) {
-    return "null";
-  } else if (value === undefined) {
-    return "undefined";
-  } else {
-    return String(value);
-  }
+  return String(value);
 };
