@@ -83,7 +83,7 @@ export class Player implements IPlayer {
         break;
       }
     }
-    if (discardCards.length !== 0) {
+    if (discardCards.length > 0) {
       this.hands = this.hands.filter((card) => !discardCards.includes(card));
     }
     return discardCards;
@@ -132,7 +132,7 @@ export class GameMaster implements IGameMaster {
     });
 
     this.logger.start();
-    while (this.rank.length < 3 || this.loser === null) {
+    while (this.rank.length < this.players.length - 1 || this.loser === null) {
       for (let index = 0; index < this.players.length; index++) {
         const player = this.players[index];
         const opponentPlayer = this.players[(index + 1) % this.players.length];
