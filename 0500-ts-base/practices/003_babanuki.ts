@@ -141,7 +141,7 @@ export class GameMaster implements IGameMaster {
     });
 
     this.logger.start();
-    while (this.rank.length < this.players.length - 1 || this.loser === null) {
+    while (this.rank.length < this.players.length - 1 && this.loser === null) {
       for (let index = 0; index < this.players.length; index++) {
         const player = this.players[index];
         // playerがゲームに参加しているかを確認する。ゲームに参加していな場合は次のPlayerに移動する
