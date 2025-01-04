@@ -168,7 +168,6 @@ export class GameMaster implements IGameMaster {
         }
 
         if (!this.rank.includes(player)) {
-          console.log(`${this.turn} ===========`);
           this.logger.currentState(this.turn, player);
 
           const randomIndex = getRandomIndex(nextPlayer.hands.length);
