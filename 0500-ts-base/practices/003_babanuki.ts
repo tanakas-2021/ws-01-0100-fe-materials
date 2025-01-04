@@ -83,10 +83,10 @@ export class Player implements IPlayer {
         break;
       }
     }
-    if(discardCards.length !== 0){
+    if (discardCards.length !== 0) {
       this.hands = this.hands.filter((card) => !discardCards.includes(card));
     }
-    return discardCards
+    return discardCards;
   }
 
   drawCard(card: Card): void {
@@ -99,48 +99,30 @@ export class Player implements IPlayer {
 
 export class GameMaster implements IGameMaster {
   logger: ILogger;
-  cards: Card[];
+  cards: Card[] = Card.prepare();
   players: IPlayer[];
-  rank: IPlayer[];
-  turn: number;
-  loser: IPlayer | null;
-
-  // Fisher-Yates Shuffleアルゴリズムを使い、deckをランダムにシャッフル
-  shuffleDeck(cards: Card[]): Card[] {
-    for (let i = cards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [cards[i], cards[j]] = [cards[j], cards[i]];
-    }
-    return cards;
-  }
-  distributeCards(shuffledDeck: Card[], indices: number[], player: IPlayer) {
-    indices.forEach((index) => {
-      player.hands.push(shuffledDeck[index]);
-    });
-  }
+  rank: IPlayer[] = [];
+  turn: number = 1;
+  loser: IPlayer | null = null;
 
   constructor(logger: ILogger, players: IPlayer[]) {
     this.logger = logger;
     this.players = players;
-    this.turn = 1;
-    this.cards = Card.prepare();
-    this.rank = [];
-    this.loser = null;
   }
 
   run() {
-    const shuffledDeck = this.shuffleDeck(this.cards);
-    const distributionIndices = [
-      [0, 1, 8, 9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49], // Player 0
-      [2, 3, 10, 11, 18, 19, 26, 27, 34, 35, 42, 43, 50, 51], // Player 1
-      [4, 5, 12, 13, 20, 21, 28, 29, 36, 37, 44, 45, 52], // Player 2
-      [6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47], // Player 3
-    ];
-    this.players.forEach((player, index) => {
-      const indices = distributionIndices[index];
-      this.distributeCards(shuffledDeck, indices, player);
-    });
-
+    // playerにランダムにカード1枚づつデッキがなくなるまで渡す
+    while (this.cards.length > 0) {
+      for (const player of this.players) {
+        if (this.cards.length <= 0) {
+          break;
+        }
+        const randomIndex = getRandomIndex(this.cards.length);
+        player.hands.push(this.cards[randomIndex]);
+        this.cards.splice(randomIndex, 1);
+      }
+    }
+    
     this.logger.firstDiscard();
     this.players.map((player) => {
       this.logger.currentState(this.turn, player);
