@@ -145,7 +145,7 @@ export interface IPlayer {
   firstDiscardCards: (cards: Card[]) => Card[];
   discardCards: (drawCard: Card) => Card[];
   drawCard: (card: Card) => void;
-  giveCardToOpponent: (card: Card) => void;
+  giveCardToNextPlayer: (card: Card) => void;
   done:boolean;
 }
 

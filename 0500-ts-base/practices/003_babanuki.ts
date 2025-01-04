@@ -92,7 +92,7 @@ export class Player implements IPlayer {
   drawCard(card: Card): void {
     this.hands.push(card);
   }
-  giveCardToOpponent(card: Card): void {
+  giveCardToNextPlayer(card: Card): void {
     this.hands = this.hands.filter((hand) => hand !== card);
   }
 }
@@ -140,12 +140,12 @@ export class GameMaster implements IGameMaster {
           continue;
         }
         // 次のPlayerを探す
-        let opponentIndex = (index + 1) % this.players.length; // 最初の相手の候補
-        let opponentPlayer = this.players[opponentIndex];
-        while (this.rank.includes(opponentPlayer)) {
-          opponentIndex = (opponentIndex + 1) % this.players.length; // 次のプレイヤー
-          opponentPlayer = this.players[opponentIndex];
-          if (opponentPlayer === player) {
+        let nextIndex = (index + 1) % this.players.length; // 最初の相手の候補
+        let nextPlayer = this.players[nextIndex];
+        while (this.rank.includes(nextPlayer)) {
+          nextIndex = (nextIndex + 1) % this.players.length; // 次のプレイヤー
+          nextPlayer = this.players[nextIndex];
+          if (nextPlayer === player) {
             // 自分自身しか残っていない場合
             this.loser = player;
             break;
@@ -157,7 +157,7 @@ export class GameMaster implements IGameMaster {
           this.rank.push(player);
           this.logger.done(player);
           if (this.players.length === 2) {
-            this.loser = opponentPlayer;
+            this.loser = nextPlayer;
             break;
           }
         }
@@ -171,12 +171,12 @@ export class GameMaster implements IGameMaster {
           console.log(`${this.turn} ===========`);
           this.logger.currentState(this.turn, player);
 
-          const randomIndex = getRandomIndex(opponentPlayer.hands.length);
-          const drawCard = opponentPlayer.hands[randomIndex];
-          this.logger.draw(player, opponentPlayer, drawCard);
+          const randomIndex = getRandomIndex(nextPlayer.hands.length);
+          const drawCard = nextPlayer.hands[randomIndex];
+          this.logger.draw(player, nextPlayer, drawCard);
 
           player.drawCard(drawCard);
-          opponentPlayer.giveCardToOpponent(drawCard);
+          nextPlayer.giveCardToNextPlayer(drawCard);
 
           const discardCards: Card[] = player.discardCards(drawCard);
           this.logger.discard(player, discardCards);
@@ -187,7 +187,7 @@ export class GameMaster implements IGameMaster {
             this.rank.push(player);
             this.logger.done(player);
             if (this.players.length === 2) {
-              this.loser = opponentPlayer;
+              this.loser = nextPlayer;
               break;
             }
           }
