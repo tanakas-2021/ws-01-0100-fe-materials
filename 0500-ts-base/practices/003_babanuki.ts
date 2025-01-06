@@ -179,10 +179,6 @@ export class GameMaster implements IGameMaster {
             this.rank.push(player);
             this.logger.done(player);
             continue;
-            // if (this.players.length === 2) {
-            //   this.loser = nextPlayer;
-            //   break;
-            // }
           }
           //playerのカードの枚数がjoker1枚のみとき、ゲームを終了する
           if (player.isLose) {
@@ -194,10 +190,6 @@ export class GameMaster implements IGameMaster {
             this.rank.push(nextPlayer);
             this.logger.done(nextPlayer);
             continue;
-            // if (this.players.length === 2) {
-            //   this.loser = player;
-            //   break;
-            // }
           }
           //nextplayerのカードの枚数がjoker1枚のみとき、ゲームを終了する
           if (nextPlayer.isLose) {
