@@ -144,8 +144,7 @@ export class Logger implements ILogger {
 export interface IPlayer {
   hands: Card[];
   name: string;
-  firstDiscardCards: (cards: Card[]) => Card[];
-  discardCards: (drawCard: Card) => Card[];
+  discardCards: (cards: Card[]) => Card[];
   drawCard: (player: IPlayer) => Card;
   done: boolean;
   isLose: boolean;
