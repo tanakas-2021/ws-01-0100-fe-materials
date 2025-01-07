@@ -104,14 +104,17 @@ export class GameMaster implements IGameMaster {
     this.players = players;
   }
 
-  run() {
+  dealCards() {
     let flag: Record<number, boolean> = {};
     for (let i = 0; i < this.cards.length; i++) {
       const index = getRandomIndex(this.cards.length, flag);
       this.players[i % this.players.length].hands.push(this.cards[index]);
       flag[index] = true;
     }
+  }
 
+  run() {
+    this.dealCards();
     this.logger.firstDiscard();
     this.players.map((player) => {
       this.logger.currentState(this.turn, player);
