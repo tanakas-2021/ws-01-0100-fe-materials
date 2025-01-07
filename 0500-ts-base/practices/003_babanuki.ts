@@ -105,16 +105,11 @@ export class GameMaster implements IGameMaster {
   }
 
   run() {
-    // playerにランダムにカード1枚づつデッキがなくなるまで渡す
-    while (this.cards.length > 0) {
-      for (const player of this.players) {
-        if (this.cards.length <= 0) {
-          break;
-        }
-        const randomIndex = getRandomIndex(this.cards.length);
-        player.hands.push(this.cards[randomIndex]);
-        this.cards.splice(randomIndex, 1);
-      }
+    let flag: Record<number, boolean> = {};
+    for (let i = 0; i < this.cards.length; i++) {
+      const index = getRandomIndex(this.cards.length, flag);
+      this.players[i % this.players.length].hands.push(this.cards[index]);
+      flag[index] = true;
     }
 
     this.logger.firstDiscard();
@@ -145,7 +140,6 @@ export class GameMaster implements IGameMaster {
             break;
           }
         }
-
 
         if (!this.rank.includes(player)) {
           this.logger.currentState(this.turn, player);
