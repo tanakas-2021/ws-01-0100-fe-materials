@@ -116,7 +116,7 @@ export class GameMaster implements IGameMaster {
   run() {
     this.dealCards();
     this.logger.firstDiscard();
-    this.players.map((player) => {
+    this.players.forEach((player) => {
       this.logger.currentState(this.turn, player);
       const discardCards: Card[] = player.discardCards(player.hands);
       this.logger.discard(player, discardCards);
@@ -128,13 +128,13 @@ export class GameMaster implements IGameMaster {
       for (let index = 0; index < this.players.length; index++) {
         const player = this.players[index];
         // playerがゲームに参加しているかを確認する。ゲームに参加していな場合は次のPlayerに移動する
-        if (this.rank.includes(player)) {
+        if (player.done) {
           continue;
         }
         // 次のPlayerを探す
         let nextIndex = (index + 1) % this.players.length; // 最初の相手の候補
         let nextPlayer = this.players[nextIndex];
-        while (this.rank.includes(nextPlayer)) {
+        while (nextPlayer.done) {
           nextIndex = (nextIndex + 1) % this.players.length; // 次のプレイヤー
           nextPlayer = this.players[nextIndex];
           if (nextPlayer === player) {
@@ -144,40 +144,38 @@ export class GameMaster implements IGameMaster {
           }
         }
 
-        if (!this.rank.includes(player)) {
-          this.logger.currentState(this.turn, player);
+        this.logger.currentState(this.turn, player);
 
-          // draw card
-          const drawCard = player.drawCard(nextPlayer);
-          this.logger.draw(player, nextPlayer, drawCard);
+        // draw card
+        const drawCard = player.drawCard(nextPlayer);
+        this.logger.draw(player, nextPlayer, drawCard);
 
-          // discard card if match
-          const discardCards: Card[] = player.discardCards(player.hands);
-          this.logger.discard(player, discardCards);
-          this.turn += 1;
+        // discard card if match
+        const discardCards: Card[] = player.discardCards(player.hands);
+        this.logger.discard(player, discardCards);
+        this.turn += 1;
 
-          //playerのカードの枚数が0枚であればゲームから抜けたことを出力する
-          if (player.done) {
-            this.rank.push(player);
-            this.logger.done(player);
-            continue;
-          }
-          //playerのカードの枚数がjoker1枚のみとき、ゲームを終了する
-          if (player.isLose) {
-            this.loser = player;
-            break;
-          }
-          //nextplayerのカードの枚数が0枚であればゲームから抜けたことを出力する
-          if (nextPlayer.done) {
-            this.rank.push(nextPlayer);
-            this.logger.done(nextPlayer);
-            continue;
-          }
-          //nextplayerのカードの枚数がjoker1枚のみとき、ゲームを終了する
-          if (nextPlayer.isLose) {
-            this.loser = nextPlayer;
-            break;
-          }
+        //playerのカードの枚数が0枚であればゲームから抜けたことを出力する
+        if (player.done) {
+          this.rank.push(player);
+          this.logger.done(player);
+          continue;
+        }
+        //playerのカードの枚数がjoker1枚のみとき、ゲームを終了する
+        if (player.isLose) {
+          this.loser = player;
+          break;
+        }
+        //nextplayerのカードの枚数が0枚であればゲームから抜けたことを出力する
+        if (nextPlayer.done) {
+          this.rank.push(nextPlayer);
+          this.logger.done(nextPlayer);
+          continue;
+        }
+        //nextplayerのカードの枚数がjoker1枚のみとき、ゲームを終了する
+        if (nextPlayer.isLose) {
+          this.loser = nextPlayer;
+          break;
         }
       }
     }
