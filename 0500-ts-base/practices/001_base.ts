@@ -36,11 +36,11 @@ export const sum = (nums: number[]): number => {
 */
 
 export const format = (date: Date) => {
-  const year: number = date.getFullYear();
-  const month: string = (date.getMonth() + 1).toString().padStart(2, "0"); //月は0始まりのため1を足す
-  const day: string = date.getDate().toString().padStart(2, "0");
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0"); //月は0始まりのため1を足す
+  const day = date.getDate().toString().padStart(2, "0");
 
-  const formattedDate: string = `${year}/${month}/${day}`;
+  const formattedDate = `${year}/${month}/${day}`;
   return formattedDate;
 };
 
@@ -63,7 +63,7 @@ export const merge = (
   obj1: Record<string, number>,
   obj2: Record<string, number>
 ): Record<string, number> => {
-  const result: Record<string, number> = { ...obj1 };
+  const result = { ...obj1 };
   Object.keys(obj2).forEach((key) => {
     if (result[key]) {
       result[key] += obj2[key];
