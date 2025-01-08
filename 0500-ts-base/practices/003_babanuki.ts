@@ -131,17 +131,17 @@ export class GameMaster implements IGameMaster {
         if (player.done) {
           continue;
         }
+        // 自分自身しか残っていない場合が自分敗者
+        if (this.players.length - this.rank.length === 1) {
+          this.loser = player
+          break
+       }
         // 次のPlayerを探す
         let nextIndex = (index + 1) % this.players.length; // 最初の相手の候補
         let nextPlayer = this.players[nextIndex];
         while (nextPlayer.done) {
           nextIndex = (nextIndex + 1) % this.players.length; // 次のプレイヤー
           nextPlayer = this.players[nextIndex];
-          if (nextPlayer === player) {
-            // 自分自身しか残っていない場合
-            this.loser = player;
-            break;
-          }
         }
 
         this.logger.currentState(this.turn, player);
@@ -149,6 +149,18 @@ export class GameMaster implements IGameMaster {
         // draw card
         const drawCard = player.drawCard(nextPlayer);
         this.logger.draw(player, nextPlayer, drawCard);
+
+        //nextplayerのカードの枚数が0枚であればゲームから抜けたことを出力する
+        if (nextPlayer.done) {
+          this.rank.push(nextPlayer);
+          this.logger.done(nextPlayer);
+          continue;
+        }
+        //nextplayerのカードの枚数がjoker1枚のみとき、ゲームを終了する
+        if (nextPlayer.isLose) {
+          this.loser = nextPlayer;
+          break;
+        }
 
         // discard card if match
         const discardCards: Card[] = player.discardCards(player.hands);
@@ -166,17 +178,7 @@ export class GameMaster implements IGameMaster {
           this.loser = player;
           break;
         }
-        //nextplayerのカードの枚数が0枚であればゲームから抜けたことを出力する
-        if (nextPlayer.done) {
-          this.rank.push(nextPlayer);
-          this.logger.done(nextPlayer);
-          continue;
-        }
-        //nextplayerのカードの枚数がjoker1枚のみとき、ゲームを終了する
-        if (nextPlayer.isLose) {
-          this.loser = nextPlayer;
-          break;
-        }
+        
       }
     }
     if (this.loser !== null) {
