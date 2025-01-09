@@ -10,8 +10,9 @@
    振る舞い: 引数で渡された2つの数値を足し算して返す
 */
 
-
-/* [ここに実装] */
+export const add = (num1: number, num2: number): number => {
+  return num1 + num2;
+};
 
 /* 1.2 以下の関数を実装して下さい
    関数名: sum
@@ -20,7 +21,12 @@
    振る舞い: 配列の中身の数を全て足し算して返す
 */
 
-/* [ここに実装] */
+export const sum = (nums: number[]): number => {
+  return nums.reduce(
+    (accumulator, currentValue) => accumulator + currentValue,
+    0
+  );
+};
 
 /* 1.3 以下の関数を実装して下さい
    関数名: format
@@ -29,7 +35,14 @@
    振る舞い: 引数で渡されたDate型の日付をYYYY/MM/DDの形式にして返す
 */
 
-/* [ここに実装] */
+export const format = (date: Date) => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0"); //月は0始まりのため1を足す
+  const day = date.getDate().toString().padStart(2, "0");
+
+  const formattedDate = `${year}/${month}/${day}`;
+  return formattedDate;
+};
 
 /* 1.4 以下の関数を実装して下さい
    関数名: merge
@@ -46,7 +59,20 @@
    merge({}, {}) => {}
 */
 
-/* [ここに実装] */
+export const merge = (
+  obj1: Record<string, number>,
+  obj2: Record<string, number>
+): Record<string, number> => {
+  const result = { ...obj1 };
+  Object.keys(obj2).forEach((key) => {
+    if (result[key]) {
+      result[key] += obj2[key];
+    } else {
+      result[key] = obj2[key];
+    }
+  });
+  return result;
+};
 
 /* 1.5 以下の関数を実装して下さい
    関数名: stringify
@@ -63,4 +89,8 @@
    stringify(undefined) => "undefined"
 */
 
-/* [ここに実装] */
+export const stringify = (
+  value: string | number | boolean | null | undefined
+): string => {
+  return String(value);
+};
