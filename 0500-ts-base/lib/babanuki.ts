@@ -1,6 +1,8 @@
-
 // [編集不要] ランダムな数値を取得する関数
-export function getRandomIndex(max: number, flag: Record<number, boolean> = {}) {
+export function getRandomIndex(
+  max: number,
+  flag: Record<number, boolean> = {}
+) {
   let list = [];
   for (let i = 0; i < max; i++) {
     if (!flag[i]) {
@@ -118,7 +120,7 @@ export class Logger implements ILogger {
       turn,
       "[STATE]",
       `${player.name}'s hands`,
-      player.hands.map((it) => it.toString()),
+      player.hands.map((it) => it.toString())
     );
   }
 
@@ -127,14 +129,14 @@ export class Logger implements ILogger {
     console.log(
       `${player.name}'s hands after discard`,
       player.hands.map((it) => it.toString()),
-      `count: ${player.hands.length}`,
+      `count: ${player.hands.length}`
     );
   }
 
   draw(from: IPlayer, to: IPlayer, card: Card) {
     console.log(
       "[DRAW]",
-      `${from.name} drew " ${card.toString()} " from ${to.name}`,
+      `${from.name} drew " ${card.toString()} " from ${to.name}`
     );
   }
 }
@@ -142,6 +144,10 @@ export class Logger implements ILogger {
 export interface IPlayer {
   hands: Card[];
   name: string;
+  discardCards: () => Card[];
+  drawCard: (player: IPlayer) => Card;
+  done: boolean;
+  isLose: boolean;
 }
 
 export interface IGameMaster {
@@ -151,6 +157,5 @@ export interface IGameMaster {
   rank: IPlayer[];
   turn: number;
   run: () => void;
+  loser: IPlayer | null;
 }
-
-
